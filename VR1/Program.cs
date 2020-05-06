@@ -10,7 +10,7 @@ namespace VR1
     {
         static void Main(string[] args)
         {
-            var application = new App(800, 600, "Масоны");
+            var application = new Win(800, 600, "Масоны");
             application.Run(60);
         }
     }
