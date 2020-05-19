@@ -43,7 +43,7 @@ namespace VR1
             //_vao = GL.GenVertexArray();
 
 
-            GL.BindVertexArray(_vao);
+            //GL.BindVertexArray(_vao);
 
             shader = new Shader("shaders/shader.v", "shaders/shader.f");
 
@@ -66,7 +66,7 @@ namespace VR1
             GL.BufferData(BufferTarget.ElementArrayBuffer, mesh.indices.Length * sizeof(uint), mesh.indices, BufferUsageHint.StaticDraw);
 
 
-            //_imGuiController = new ImGuiController();
+            _imGuiController = new ImGuiController();
 
             base.OnLoad(e);
         }
@@ -80,28 +80,28 @@ namespace VR1
             base.OnUnload(e);
         }
 
-        private float scale = 0.3f;
+        private float scale = 0.5f;
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            //_imGuiController.NewFrame(this);
+            _imGuiController.NewFrame(this);
 
-            //GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Blend);
 
             shader.Use();
 
-            /*ImGui.Begin("Uniforms");
+            ImGui.Begin("Uniforms");
             ImGui.SliderFloat("Scale", ref scale, 0, 2);
-            ImGui.End();*/
+            ImGui.End();
 
             shader.SetUniform("scale", scale);
-
+            //GL.BindVertexArray(_vao);
             GL.PointSize(50);
             GL.DrawElements(PrimitiveType.Triangles, mesh.indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            //_imGuiController.Render();
+            _imGuiController.Render();
 
             Context.SwapBuffers();
 
@@ -112,7 +112,7 @@ namespace VR1
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
-            //_imGuiController.SetWindowSize(Width, Height);
+            _imGuiController.SetWindowSize(Width, Height);
 
             base.OnResize(e);
         }

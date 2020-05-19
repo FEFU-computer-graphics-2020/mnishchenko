@@ -99,8 +99,11 @@ namespace OpenGL
 
         private void CreateDeviceObjects()
         {
+            GL.GetInteger(GetPName.VertexArrayBinding, out var prev_vao);
+
             _vertexArray = GL.GenVertexArray();
             GL.BindVertexArray(_vertexArray);
+
 
             _shader = new Shader("shaders/imgui.v", "shaders/imgui.f");
 
@@ -108,6 +111,8 @@ namespace OpenGL
             _indexBuffer = GL.GenBuffer();
 
             CreateFontsTexture();
+
+            GL.BindVertexArray(prev_vao);
         }
 
         private void CreateFontsTexture()
