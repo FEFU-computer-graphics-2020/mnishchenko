@@ -10,7 +10,7 @@ namespace VR1
     {
         static void Main(string[] args)
         {
-            var application = new Win(800, 600, "Масоны");
+            var application = new Win(800, 800, "Test OpenGL");
             application.Run(60);
         }
     }

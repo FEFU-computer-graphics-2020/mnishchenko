@@ -8,6 +8,9 @@ using OpenTK.Graphics;
 using OpenTK.Input;
 using OpenTK.Graphics.OpenGL;
 using System.Runtime.CompilerServices;
+using ImGuiNET;
+using VR1;
+using OpenGL;
 
 namespace VR1
 {
@@ -21,20 +24,8 @@ namespace VR1
         int _vbo, _vao, _ibo;
         private Mesh mesh;
         private Shader shader;
+        private ImGuiController _imGuiController;
 
-
-        float[] vertices = {
-             0.5f,  0.5f, 0.0f,  
-             0.5f, -0.5f, 0.0f,  
-            -0.5f, -0.5f, 0.0f,  
-            -0.5f,  0.5f, 0.0f   
-        };
-
-        uint[] indices =
-        {
-            0, 1, 3,
-            1, 2, 3
-        };
 
 
 
@@ -75,6 +66,7 @@ namespace VR1
             GL.BufferData(BufferTarget.ElementArrayBuffer, mesh.indices.Length * sizeof(uint), mesh.indices, BufferUsageHint.StaticDraw);
 
 
+            //_imGuiController = new ImGuiController();
 
             base.OnLoad(e);
         }
@@ -88,19 +80,28 @@ namespace VR1
             base.OnUnload(e);
         }
 
-
         private float scale = 0.3f;
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
+            //_imGuiController.NewFrame(this);
+
+            //GL.Enable(EnableCap.Blend);
+
             shader.Use();
+
+            /*ImGui.Begin("Uniforms");
+            ImGui.SliderFloat("Scale", ref scale, 0, 2);
+            ImGui.End();*/
+
             shader.SetUniform("scale", scale);
 
             GL.PointSize(50);
             GL.DrawElements(PrimitiveType.Triangles, mesh.indices.Length, DrawElementsType.UnsignedInt, 0);
 
+            //_imGuiController.Render();
 
             Context.SwapBuffers();
 
@@ -111,6 +112,8 @@ namespace VR1
         protected override void OnResize(EventArgs e)
         {
             GL.Viewport(0, 0, Width, Height);
+            //_imGuiController.SetWindowSize(Width, Height);
+
             base.OnResize(e);
         }
 
