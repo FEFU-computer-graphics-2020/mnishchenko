@@ -37,13 +37,11 @@ namespace VR1
 
         protected override void OnLoad(EventArgs e)
         {
-            GL.ClearColor(0.2f, 0.2f, 0.5f, 1.0f);
+            GL.ClearColor(0, 0, 0, 1.0f);
+            GL.Enable(EnableCap.DepthTest);
+            
 
             _vbo = GL.GenBuffer();
-            //_vao = GL.GenVertexArray();
-
-
-            //GL.BindVertexArray(_vao);
 
             shader = new Shader("shaders/shader.v", "shaders/shader.f");
 
@@ -80,11 +78,19 @@ namespace VR1
             base.OnUnload(e);
         }
 
-        private float scale = 0.5f;
+        private float _scale = 0.5f;
+        private float _angle = 0.0f;
+        private float _angleZ = 0.0f;
+        private float _distanse = 1.0f;
+        private bool _persp = false;
+
+
+
+
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             _imGuiController.NewFrame(this);
 
@@ -93,11 +99,36 @@ namespace VR1
             shader.Use();
 
             ImGui.Begin("Uniforms");
-            ImGui.SliderFloat("Scale", ref scale, 0, 2);
+            ImGui.SliderFloat("Scale", ref _scale, 0, 1);
+            ImGui.SliderFloat("Angle", ref _angle, -3.14f, 3.14f);
+            ImGui.SliderFloat("Angle on Z", ref _angleZ, -3.14f, 3.14f);
+            ImGui.SliderFloat("Distance", ref _distanse, 1, 15.0f);
+            ImGui.Checkbox("Perspective View", ref _persp);
             ImGui.End();
 
-            shader.SetUniform("scale", scale);
-            //GL.BindVertexArray(_vao);
+            shader.SetUniform("scale", _scale);
+
+            
+            var model = Matrix4.CreateRotationY(_angle) * Matrix4.CreateRotationX(_angleZ);
+            model = model * Matrix4.CreateTranslation(0, 0, -_distanse);
+            shader.SetUniform("my_model", model);
+            
+
+            
+            if (_persp)
+            {
+                var perspective_proj = Matrix4.CreatePerspectiveFieldOfView((float)(Math.PI / 2), (float)Width / Height, 0.1f, 100.0f);
+                shader.SetUniform("proj", perspective_proj);
+            }
+            else
+            {
+                var ortographic_proj = Matrix4.CreateOrthographic(10, 10, -10, 10);
+                shader.SetUniform("proj", ortographic_proj);
+            }
+
+
+
+
             GL.PointSize(50);
             GL.DrawElements(PrimitiveType.Triangles, mesh.indices.Length, DrawElementsType.UnsignedInt, 0);
 

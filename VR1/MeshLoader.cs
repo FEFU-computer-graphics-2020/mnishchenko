@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using OpenTK;
 using System.Globalization;
+using System;
 
 namespace VR1
 {
@@ -34,6 +35,8 @@ namespace VR1
             var reg_v = new Regex(@"v ([-\.\d]+) ([-\.\d]+) ([-\.\d]+)");
             var reg_i = new Regex(@"f (\d+)/(\d+)/(\d+) (\d+)/(\d+)/(\d+) (\d+)/(\d+)/(\d+)");
 
+            Random r1 = new Random();
+
             foreach (var row in rows)
             {
                 if (reg_v.IsMatch(row))
@@ -42,7 +45,8 @@ namespace VR1
 
                     var vertex = new Vertex(
                         new Vector3(float.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture), float.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture), float.Parse(match.Groups[3].Value, CultureInfo.InvariantCulture)),
-                        new Vector3(1.0f, 0.0f, 0.0f)
+                        new Vector3((float)r1.NextDouble(), (float)r1.NextDouble(), (float)r1.NextDouble())
+                        //new Vector3(1.0f, 0.0f, 0.0f)
                     );
                     vertices.Add(vertex);
 

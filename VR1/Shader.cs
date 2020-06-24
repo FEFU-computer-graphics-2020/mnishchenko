@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using OpenTK.Graphics.OpenGL;
+using OpenTK;
 
 namespace VR1
 {
@@ -103,8 +104,10 @@ namespace VR1
         {
             GL.Uniform1(GetUniformLocation(name), val);
         }
-
-
+        public void SetUniform(string name, Matrix4 val)
+        {
+            GL.UniformMatrix4(GetUniformLocation(name), false, ref val);
+        }
 
 
 
@@ -124,10 +127,12 @@ namespace VR1
             }
         }
 
-        ~Shader()
+
+
+        /*~Shader()
         {
             GL.DeleteProgram(_handle);
-        }
+        }*/
 
 
         public void Dispose()
