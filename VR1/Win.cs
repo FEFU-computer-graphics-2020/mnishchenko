@@ -28,8 +28,14 @@ namespace VR1
 
 
 
-
-
+        // camera
+        float speed = 1.5f;
+        Vector3 position = new Vector3(0.0f, 0.0f, 3.0f);
+        Vector3 front = new Vector3(0.0f, 0.0f, -1.0f);
+        Vector3 up = new Vector3(0.0f, 1.0f, 0.0f);
+        Matrix4 view = Matrix4.LookAt(new Vector3(0.0f, 0.0f, 3.0f),
+             new Vector3(0.0f, 0.0f, 0.0f),
+             new Vector3(0.0f, 1.0f, 0.0f));
 
 
 
@@ -67,6 +73,9 @@ namespace VR1
             _imGuiController = new ImGuiController();
 
             base.OnLoad(e);
+
+
+            
         }
         protected override void OnUnload(EventArgs e)
         {
@@ -83,6 +92,10 @@ namespace VR1
         private float _angleZ = 0.0f;
         private float _distanse = 1.0f;
         private bool _persp = false;
+        private float _moveX = 1f;
+        private float _moveY = 1f;
+
+
 
 
 
@@ -92,6 +105,10 @@ namespace VR1
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+           
+            
+            
+
             _imGuiController.NewFrame(this);
 
             GL.Enable(EnableCap.Blend);
@@ -99,18 +116,29 @@ namespace VR1
             shader.Use();
 
             ImGui.Begin("Uniforms");
-            ImGui.SliderFloat("Scale", ref _scale, 0, 1);
+            ImGui.SliderFloat("Move X", ref _moveX, -10, 10);
+            ImGui.SliderFloat("Move Y", ref _moveY, -10, 10);
+            ImGui.SliderFloat("Scale", ref _scale, 0, 10);
             ImGui.SliderFloat("Angle", ref _angle, -3.14f, 3.14f);
             ImGui.SliderFloat("Angle on Z", ref _angleZ, -3.14f, 3.14f);
             ImGui.SliderFloat("Distance", ref _distanse, 1, 15.0f);
             ImGui.Checkbox("Perspective View", ref _persp);
             ImGui.End();
 
+            ImGui.Begin("Controls");
+            ImGui.Text("W - Forward");
+            ImGui.Text("S - Backward");
+            ImGui.Text("A - Left");
+            ImGui.Text("D - Right");
+            ImGui.Text("Space - Up");
+            ImGui.Text("LCtrl - Down");
+            ImGui.End();
+
             shader.SetUniform("scale", _scale);
 
             
             var model = Matrix4.CreateRotationY(_angle) * Matrix4.CreateRotationX(_angleZ);
-            model = model * Matrix4.CreateTranslation(0, 0, -_distanse);
+            model = model * Matrix4.CreateTranslation(_moveX, _moveY, -_distanse);
             shader.SetUniform("my_model", model);
             
 
@@ -122,17 +150,22 @@ namespace VR1
             }
             else
             {
-                var ortographic_proj = Matrix4.CreateOrthographic(10, 10, -10, 10);
+                var ortographic_proj = Matrix4.CreateOrthographic(10, 10, -10, 10); //.CreateOrthographicOffCenter(0.0f, 800.0f, 0.0f, 600.0f, 0.1f, 100.0f);
                 shader.SetUniform("proj", ortographic_proj);
             }
 
-
+            view = Matrix4.LookAt(position, position + front, up);
+            
+            
+            GL.UniformMatrix4(21, false, ref view);
 
 
             GL.PointSize(50);
             GL.DrawElements(PrimitiveType.Triangles, mesh.indices.Length, DrawElementsType.UnsignedInt, 0);
 
             _imGuiController.Render();
+
+            
 
             Context.SwapBuffers();
 
@@ -155,6 +188,48 @@ namespace VR1
             if (input.IsKeyDown(Key.Escape))
             {
                 Exit();
+            }
+
+
+            if (!Focused) // check focused (on window)
+            {
+                return;
+            }
+
+            if (input.IsKeyDown(Key.W))
+            {
+                Console.WriteLine("MOVE FORWARD");
+                position += front * speed * (float)e.Time; //Forward 
+            }
+
+            if (input.IsKeyDown(Key.S))
+            {
+                Console.WriteLine("MOVE BACK");
+                position -= front * speed * (float)e.Time; //Backwards
+            }
+
+            if (input.IsKeyDown(Key.A))
+            {
+                Console.WriteLine("LEFT");
+                position -= Vector3.Normalize(Vector3.Cross(front, up)) * speed * (float)e.Time; //Left
+            }
+
+            if (input.IsKeyDown(Key.D))
+            {
+                Console.WriteLine("RIGHT");
+                position += Vector3.Normalize(Vector3.Cross(front, up)) * speed * (float)e.Time; //Right
+            }
+
+            if (input.IsKeyDown(Key.Space))
+            {
+                Console.WriteLine("UP");
+                position += up * speed * (float)e.Time; //Up 
+            }
+
+            if (input.IsKeyDown(Key.LControl))
+            {
+                Console.WriteLine("DOWN");
+                position -= up * speed * (float)e.Time; //Down
             }
 
 
